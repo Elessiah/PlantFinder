@@ -1,6 +1,7 @@
 function getKeywords(string) {
     const keywords = string
         .replace("/", "")
+        .replace('"', " ")
         .replace("'", " ")
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, "")

@@ -9,6 +9,7 @@ function ResearchBar({ setData, db }) {
 
     useEffect(() => {
         if (research.length > 0) {
+            setData([]);
             const keywords = getKeywords(research);
             updateData(db, keywords, setData);
         }

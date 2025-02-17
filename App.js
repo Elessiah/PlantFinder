@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import {Button, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Button, Dimensions, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import ResearchBar from "./src/ResearchBar";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import * as Sqlite from 'expo-sqlite';
 import dbInit from './src/dbInit';
 import LoadData from './src/LoadData';
@@ -15,34 +15,60 @@ export default function App() {
   }, []);
 
   const [data, setData] = useState([]);
+  const [visible, setVisible] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <ResearchBar setData={setData} db={db} />
-      <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={true}
-      >
-        {data.map((item, index) => (
-            <View key={index} style={[styles.slide, { backgroundColor: index % 2 ? "#0e4404" : "#047c49" }]}>
-              <Text style={styles.title}>{item.name}</Text>
-              <Text style={styles.subTitle}>Symptômes :</Text>
-              <Text style={styles.content}>{item.symptoms}</Text>
-              <Text style={styles.subTitle}>Contre-indication :</Text>
-              <Text style={styles.content}>{item.contradication}</Text>
-              <Text style={styles.subTitle}>Parties :</Text>
-              <Text style={styles.content}>{item.parts}</Text>
+      <View style={styles.container}>
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={visible}
+            onRequestClose={() => setVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text>Chargement des données...</Text>
+              <Text>Veuillez patientez...</Text>
             </View>
-        ))}
-      </ScrollView>
-      <TouchableOpacity style={styles.loadData}  onPress={async () => {
-        await LoadData(db);
-      }}>
-        <Text style={styles.loadDataText}>Charger des données</Text>
-      </TouchableOpacity>
-      <StatusBar style="auto" />
-    </View>
+          </View>
+        </Modal>
+        <ResearchBar setData={setData} db={db}/>
+        <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={true}
+        >
+          {data.map((item, index) => (
+              <View key={index} style={[styles.slide, {backgroundColor: index % 2 ? "#0e4404" : "#047c49"}]}>
+                <Text style={styles.title}>{item.name.replace("\\dqu", '"').replace("\\qu", "'")}</Text>
+                <Text style={styles.subTitle}>Symptômes :</Text>
+                <Text style={styles.content}>{item.symptoms.replace("\\dqu", '"').replace("\\qu", "'")}</Text>
+                <Text style={styles.subTitle}>Contre-indication :</Text>
+                <Text style={styles.content}>{item.contradication.replace("\\dqu", '"').replace("\\qu", "'")}</Text>
+                <Text style={styles.subTitle}>Parties :</Text>
+                <Text style={styles.content}>{item.parts.replace("\\dqu", '"').replace("\\qu", "'")}</Text>
+              </View>
+          ))}
+        </ScrollView>
+        <View style={styles.bottomButtons}>
+          <TouchableOpacity style={styles.loadData} onPress={async () => {
+            setData([]);
+            setVisible(true);
+            await LoadData(db);
+            setVisible(false);
+          }}>
+            <Text style={styles.loadDataText}>Charger des données</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.reset} onPress={async () => {
+            setData([]);
+            await db.execAsync("DROP TABLE IF EXISTS Plant; DROP TABLE IF EXISTS keywords;");
+            dbInit(db);
+          }}>
+            <Text style={styles.resetText}>Reset</Text>
+          </TouchableOpacity>
+        </View>
+        <StatusBar style="auto"/>
+      </View>
   );
 }
 
@@ -74,8 +100,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     paddingHorizontal: 20,
   },
+  bottomButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: width,
+  },
   loadData: {
-    width: width * 0.9,
+    width: width * 0.6,
     backgroundColor: '#734306',
     height: 40,
     justifyContent: "center",
@@ -86,5 +117,30 @@ const styles = StyleSheet.create({
   loadDataText: {
     color: "#fff",
     fontSize: 20,
-  }
+  },
+  reset: {
+    width: width * 0.3,
+    backgroundColor: '#ff0000',
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 40,
+    marginBottom: 20
+  },
+  resetText: {
+    color: "#fff",
+    fontSize: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)", // Fond semi-transparent
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
 });

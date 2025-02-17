@@ -20,12 +20,11 @@ async function LoadData (db) {
                     for (let line of lines) {
                         line = line.replace(';', ',');
                         const columns = line.split(',');
-                        const plantName = columns[0].trimStart().trimEnd();
-                        const symptoms = columns[1].trimStart().trimEnd();
+                        const plantName = columns[0].replace("'", "\\qu").replace('"', "\\dqu").trimStart().trimEnd();
+                        const symptoms = columns[1].replace("'", "\\qu").replace('"', "\\dqu").trimStart().trimEnd();
                         const keywords = getKeywords(columns[1]);
-                        const contradication = columns[2].trimStart().trimEnd();
-                        const parts = columns[3].trimStart().trimEnd();
-
+                        const contradication = columns[2].replace("'", "\\qu").replace('"', "\\dqu").trimStart().trimEnd();
+                        const parts = columns[3].replace("'", "\\qu").replace('"', "\\dqu").trimStart().trimEnd();
                         let plant = await DBGetPlant(db, plantName);
                         if (plant === null)
                             plant = await insertPlant(db, plantName, symptoms, contradication, parts);
@@ -43,7 +42,6 @@ async function LoadData (db) {
     } catch (error) {
         console.log('Erreur lors du chargement du fichier csv :', error);
     }
-    console.log("Successfully load data");
 }
 
 module.exports = LoadData;

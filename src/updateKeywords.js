@@ -3,12 +3,13 @@ const updateKeywords = async (db, plant, keywords) => {
         console.log("No Keywords updated !");
         return;
     }
-    const currentKeywords = await db.getAllAsync(`SELECT word
+    let currentKeywords = await db.getAllAsync(`SELECT word
                                                   FROM keywords
                                                   WHERE id_plant = ?`, plant.id);
+    currentKeywords = currentKeywords.map(obj => obj.word);
     let newKeywords = keywords;
     if (currentKeywords.length > 0) {
-        newKeywords = keywords.filter(item => currentKeywords.includes(item));
+        newKeywords = keywords.filter(item => !currentKeywords.includes(item));
     }
     let query = "";
     for (const keyword of newKeywords) {
