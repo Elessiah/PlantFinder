@@ -39,13 +39,13 @@ export default function App() {
             showsHorizontalScrollIndicator={true}
         >
           {data.map((item, index) => (
-              <View key={index} style={[styles.slide, {backgroundColor: index % 2 ? "#0e4404" : "#047c49"}]}>
+              <View key={index} style={[styles.slide, {backgroundColor: index % 3 === 0 ? "#0e4404" : index % 3 === 1 ? "#047c49" : "#88421d"} ]}>
                 <Text style={styles.title}>{item.name.replace("\\dqu", '"').replace("\\qu", "'")}</Text>
                 <Text style={styles.subTitle}>Symptômes :</Text>
                 <Text style={styles.content}>{item.symptoms.replace("\\dqu", '"').replace("\\qu", "'")}</Text>
                 <Text style={styles.subTitle}>Contre-indication :</Text>
                 <Text style={styles.content}>{item.contradication.replace("\\dqu", '"').replace("\\qu", "'")}</Text>
-                <Text style={styles.subTitle}>Parties :</Text>
+                <Text style={styles.subTitle}>Parties utilisées:</Text>
                 <Text style={styles.content}>{item.parts.replace("\\dqu", '"').replace("\\qu", "'")}</Text>
               </View>
           ))}
@@ -97,8 +97,9 @@ const styles = StyleSheet.create({
   },
   content: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: 18,
     paddingHorizontal: 20,
+    paddingBottom:25,
   },
   bottomButtons: {
     flexDirection: "row",
