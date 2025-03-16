@@ -10,10 +10,6 @@ const { width } = Dimensions.get("window");
 const db = Sqlite.openDatabaseSync('PlantFinder.sqlite');
 
 export default function App() {
-  useEffect(() => {
-    dbInit(db);
-  }, []);
-
   const [data, setData] = useState([]);
   const [visible, setVisible] = useState(false);
 
@@ -32,7 +28,9 @@ export default function App() {
             </View>
           </View>
         </Modal>
+
         <ResearchBar setData={setData} db={db}/>
+
         <ScrollView
             horizontal
             pagingEnabled

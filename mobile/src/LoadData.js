@@ -34,13 +34,13 @@ async function LoadData (db) {
                     }
                 }
             } catch (e) {
-                console.error("Erreur lors du traitement des donnée" , e);
+                console.error("Erreur lors du traitement des donnée" , e.message);
             }
         }
         else
             console.log("No data found.");
     } catch (error) {
-        console.log('Erreur lors du chargement du fichier csv :', error);
+        console.log('Erreur lors du chargement du fichier csv :', error.message);
     }
 }
 
