@@ -4,12 +4,17 @@ import ResearchBar from "./ResearchBar.jsx";
 import LoadData from "./functions/LoadData.js";
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
+import Modal from "./Modal.jsx";
 
 const App = () => {
-    const [currentIndex, setCurrentIndex] = useState(0);
     const containerRef = useRef(null);
     const [data, setData] = React.useState([]);
-    const [visible, setVisible] = React.useState(false);
+    const [alertText, setAlertText] = React.useState("");
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const resetDataIndex = () => {
+        // setCurrentIndex(0);
+    }
 
     const formatData = (data) => {
         return data.replace("\\dqu", '"').replace("\\qu", "'");
@@ -78,18 +83,13 @@ const App = () => {
         }
     }, []);
 
+    console.log("Data: ", data);
+
     return (
         <div className={"MainContent"}>
-            {visible && (
-                <div className="modal">
-                    <div className={"modal-content"}>
-                        <p>Chargement des données...</p>
-                        <p>Veuillez patienter...</p>
-                    </div>
-                </div>
-            )}
+            <Modal text={alertText}></Modal>
 
-            <ResearchBar setData={setData} />
+            <ResearchBar setData={setData} resetDataIndex={resetDataIndex} />
 
             <div className={"carousel"} ref={containerRef}>
                 {data.map((item, index) => (
@@ -141,17 +141,26 @@ const App = () => {
                     accept={".csv"}
                     id={"fileInput"}
                     onChange={async (event) => {
-                        console.log("Loading data...")
+                        console.log("Chargement des données...");
                         setData([]);
-                        setVisible(true);
+                        resetDataIndex();
+                        setAlertText("Chargement des données...");
                         await LoadData(event);
-                        setVisible(false);
-                        console.log("Data loaded !");
+                        setAlertText("");
+                        console.log("Données chargées...");
                     }}
                 />
                 <button
+                    className={"file-input-button"}
+                    onClick={() => document.getElementById("fileInput").click()}
+                >
+                    Charger CSV
+                </button>
+                <button
                     className={"reset"}
                     onClick={async () => {
+                        setData([]);
+                        resetDataIndex();
                         await window.electron.reset();
                     }}
                 >

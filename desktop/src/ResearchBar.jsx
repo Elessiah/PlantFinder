@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import getKeywords from "./functions/getKeywords.js";
 import "./styles/ResearchBar.css"
 
-export default function ResearchBar({ setData }) {
+export default function ResearchBar({ setData, resetDataIndex }) {
     const [text, setText] = useState('');
     const [research, setResearch] = useState('');
 
@@ -15,6 +15,7 @@ export default function ResearchBar({ setData }) {
                 const result = await window.electron.getPlantsFromKeywords(keywords);
                 if (result !== null)
                     setData(result);
+                resetDataIndex();
             }
         }
         fetchData().then();

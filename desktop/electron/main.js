@@ -18,6 +18,7 @@ function createWindow() {
     win = new BrowserWindow({
         width: 900,
         height: 900,
+        resizable: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.cjs'),
             nodeIntegration: true,
@@ -25,8 +26,8 @@ function createWindow() {
         },
     });
 
-    // win.loadURL('http://localhost:5173');
-    win.loadFile(path.join(__dirname, '../dist', 'index.html'));
+    win.loadURL('http://localhost:5173');
+    // win.loadFile(path.join(__dirname, '../dist', 'index.html'));
     win.webContents.openDevTools();
 }
 
@@ -102,6 +103,8 @@ ipcMain.handle('getPlantFromID', async (event, id) => {
 
 ipcMain.handle('updateKeywords', async (event, params) => {
     const {plant, keywords} = params;
+    if (plant == null)
+        return;
     if (keywords.length === 0) {
         console.log("No Keywords updated !");
         return;
