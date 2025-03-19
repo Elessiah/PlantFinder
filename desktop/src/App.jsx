@@ -4,16 +4,18 @@ import ResearchBar from "./ResearchBar.jsx";
 import LoadData from "./functions/LoadData.js";
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
-import Modal from "./Modal.jsx";
+import sleep from './functions/sleep.js'
+import {Dialog, DialogContent} from "@mui/material";
 
 const App = () => {
     const containerRef = useRef(null);
     const [data, setData] = React.useState([]);
-    const [alertText, setAlertText] = React.useState("");
+    const [isVisible, setVisibility] = React.useState(false);
+    const [dialogText, setDialogText] = React.useState('');
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const resetDataIndex = () => {
-        // setCurrentIndex(0);
+        setCurrentIndex(0);
     }
 
     const formatData = (data) => {
@@ -83,11 +85,18 @@ const App = () => {
         }
     }, []);
 
-    console.log("Data: ", data);
+    const switchVisibility = () => {
+        setVisibility(!isVisible);
+    };
 
     return (
         <div className={"MainContent"}>
-            <Modal text={alertText}></Modal>
+
+            <Dialog open={isVisible} onClose={switchVisibility}>
+                <DialogContent sx={{ padding: '10px' }}>
+                    <p dangerouslySetInnerHTML={{ __html: dialogText }} />
+                </DialogContent>
+            </Dialog>
 
             <ResearchBar setData={setData} resetDataIndex={resetDataIndex} />
 
@@ -140,14 +149,17 @@ const App = () => {
                     type={"file"}
                     accept={".csv"}
                     id={"fileInput"}
+                    multiple={true}
                     onChange={async (event) => {
                         console.log("Chargement des données...");
                         setData([]);
                         resetDataIndex();
-                        setAlertText("Chargement des données...");
-                        await LoadData(event);
-                        setAlertText("");
-                        console.log("Données chargées...");
+                        setVisibility(true);
+                        await LoadData(event, setDialogText);
+                        setVisibility(true);
+                        setDialogText("Chargement terminé ! Bisous de Keryan !!");
+                        sleep(5000);
+                        setVisibility(false);
                     }}
                 />
                 <button

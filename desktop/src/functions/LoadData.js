@@ -1,48 +1,54 @@
 import getKeywords from "./getKeywords.js";
 
-export default async function LoadData(event) {
+export default async function LoadData(event, setDialogText) {
     try {
-        const file = event.target.files[0];
-        if (!file) {
+        const files = Array.from(event.target.files);
+        if (files.length === 0) {
             return;
         }
-        const reader = new FileReader();
-        reader.onload = async (parser) => {
-            const lines = parser.target.result.split("\n");
+
+        const formatColumn = (column) => {
+          return column.replace("'", "\\qu").replace('"', "\\dqu").trim();
+        };
+
+        let nFile = 0;
+        for (const file of files) {
+
+            const fileContent = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => resolve(event.target.result);
+                reader.onerror = (error) => reject(error);
+                reader.readAsText(file);
+            });
+
+            const lines = fileContent.split("\n");
+            let nLine = 0;
             for (let line of lines) {
                 line = line.replace(';', ',');
-                const columns = line.split(',');
-                const plantName = columns[0].replace("'", "\\qu").replace('"', "\\dqu").trimStart().trimEnd();
-                const symptoms = columns[1].replace("'", "\\qu").replace('"', "\\dqu").trimStart().trimEnd();
-                const keywords = getKeywords(columns[1]);
-                const contradication = columns[2].replace("'", "\\qu").replace('"', "\\dqu").trimStart().trimEnd();
-                const parts = columns[3].replace("'", "\\qu").replace('"', "\\dqu").trimStart().trimEnd();
+                const columns = line.split(",");
+
+                const plantName = formatColumn(columns[0]);
+                const symptoms = formatColumn(columns[1]);
+                const keywords = getKeywords(symptoms);
+                const contradication = formatColumn(columns[2]);
+                const parts = formatColumn(columns[3]);
+
                 let plant = await window.electron.getPlant(plantName);
-                if (plant === null || plant === undefined) {
-                    await window.electron.insertPlant({
-                        plantName: plantName,
-                        symptoms: symptoms,
-                        contradication: contradication,
-                        parts: parts,
-                    });
+                if (!plant) {
+                    await window.electron.insertPlant({plantName: plantName, symptoms: symptoms, contradication: contradication, parts: parts});
                     plant = await window.electron.getPlant(plantName);
+                } else {
+                    await window.electron.updatePlant({plant: plant, symptoms: symptoms, contradication: contradication, parts: parts});
                 }
-                else {
-                    await window.electron.updatePlant({
-                        plant: plant,
-                        symptoms: symptoms,
-                        contradication: contradication,
-                        parts: parts,
-                    });
-                }
-                await window.electron.updateKeywords({
-                    plant: plant,
-                    keywords: keywords,
-                });
+                await window.electron.updateKeywords({ plant: plant, keywords: keywords });
+                nLine += 1;
+                setDialogText(`Chargement des données de <b>${file.name}</b> : <i>${(nLine * 100 / lines.length).toFixed(1)}%</i>`);
             }
+            nFile++;
         }
-        reader.readAsText(file);
+
+        event.target.value = "";
     } catch (e) {
-        console.log('Erreur lors du chargement du fichier csv :', e.message);
+        console.error('Erreur lors du chargement du fichier csv :', e.message);
     }
 }

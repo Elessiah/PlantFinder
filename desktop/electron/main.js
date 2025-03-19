@@ -26,9 +26,8 @@ function createWindow() {
         },
     });
 
-    win.loadURL('http://localhost:5173');
-    // win.loadFile(path.join(__dirname, '../dist', 'index.html'));
-    win.webContents.openDevTools();
+    //win.loadURL('http://localhost:5173');
+    win.loadFile(path.join(__dirname, '../dist', 'index.html'));
 }
 
 app.whenReady().then(() => {

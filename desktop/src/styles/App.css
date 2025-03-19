@@ -13,6 +13,10 @@
     height: 100vh;
 }
 
+.dialogText {
+    padding: 5px;
+}
+
 .carousel {
     display: flex;
     overflow: hidden;
